@@ -18,7 +18,7 @@ import csv
 
 genius = lyricsgenius.Genius("Xf0XfBJTZon0Sra2rGV56TAXp6jOUaLJVhmHxqbTW5mp-j6S2NVcmHWSLQ29v0dk")
 
-def songCharacteristics(i, dataWriter, billboardChart):
+def writeSongCharacteristics(i, dataWriter, billboardChart):
     song = billboardChart[i]
     title = billboardChart[i].title
     artist = song.artist
@@ -44,7 +44,7 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
                             billboardChart = billboard.ChartData('hot-100', date = "{}-{:02d}-{}".format(year, month, day))
                             for i in range(0, numSongs):
                                 try:
-                                    songCharacteristics(i, dataWriter, billboardChart)
+                                    writeSongCharacteristics(i, dataWriter, billboardChart)
                                 except:
                                     pass
                         except:
@@ -54,7 +54,7 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
                             billboardChart = billboard.ChartData('hot-100', date = "{}-{}-{}".format(year, month, day))
                             for i in range(0, numSongs):
                                 try:
-                                    songCharacteristics(i, dataWriter, billboardChart)
+                                    writeSongCharacteristics(i, dataWriter, billboardChart)
                                 except:
                                     pass
                         except:
