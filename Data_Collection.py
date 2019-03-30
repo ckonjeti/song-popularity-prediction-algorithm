@@ -13,6 +13,7 @@ import lyricsgenius
 import csv
 import os
 import textstat
+import threading as thread
 
 #################################################################
 
@@ -53,39 +54,58 @@ def writeSongCharacteristics(i, billboardChart, songs):
 
 def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
     for year in range(startYear, endYear + 1):
-        for month in range (startMonth, endMonth + 1):
-            outputFileName = "C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv".format(year, month)
+        thread.Thread(None, target=yearlySongData, args=(year, startMonth, endMonth, numSongs)).start()
+        
+
+def yearlySongData(year, startMonth, endMonth, numSongs):
+    for month in range (startMonth, endMonth + 1):
+            thread.Thread(None, target=monthlySongData, args=(year, month, numSongs)).start()
+    
+
+def monthlySongData(year, month, numSongs):
+        outputFileName = "C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv".format(year, month)
+        
+        with open(outputFileName, 'a+', newline='', encoding='utf-8') as outputFile:
+            songs = {}
+            day = 1
+            dataWriter = csv.writer(outputFile)
             
-            with open(outputFileName, 'a+', newline='') as outputFile:
-                songs = {}
-                day = 1
-                dataWriter = csv.writer(outputFile)
-                
-                while (day <= 31):
-                    if month in range(1, 10):
-                        try:
-                            billboardChart = billboard.ChartData('hot-100', date = "{}-{:02d}-{}".format(year, month, day))
-                            for i in range(0, numSongs):
-                                try:
-                                    writeSongCharacteristics(i, billboardChart, songs)
-                                except:
-                                    pass
-                        except:
-                            pass
-                        
-                    elif month in range(10, 13):
-                        try:
-                            billboardChart = billboard.ChartData('hot-100', date = "{}-{}-{}".format(year, month, day))
-                            for i in range(0, numSongs):
-                                try:
-                                    writeSongCharacteristics(i, billboardChart, songs)
-                                except:
-                                    pass
-                        except:
-                            pass
-                    day += 5
+            while (day <= 31):
+                if month in range(1, 10):
+                    try:
+                        billboardChart = billboard.ChartData('hot-100', date = "{}-{:02d}-{}".format(year, month, day))
+                        for i in range(0, numSongs):
+                            try:
+                                writeSongCharacteristics(i, billboardChart, songs)
+                            except:
+                                pass
+                    except:
+                        pass
                     
-                for key in songs:
+                elif month in range(10, 13):
+                    try:
+                        billboardChart = billboard.ChartData('hot-100', date = "{}-{}-{}".format(year, month, day))
+                        for i in range(0, numSongs):
+                            try:
+                                writeSongCharacteristics(i, billboardChart, songs)
+                            except:
+                                pass
+                    except:
+                        pass
+                day += 5
+                
+            for key in songs:
+                if (len(songs[key][2]) < 10000):
                     dataWriter.writerow(songs[key])
-           
-getAllSongData(1, 2009, 3, 2009, 1)
+
+
+
+getAllSongData(1, 2017, 6, 2018, 1)
+
+
+
+
+
+
+
+
