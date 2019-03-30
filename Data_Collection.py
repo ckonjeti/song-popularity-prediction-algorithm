@@ -16,7 +16,7 @@ import os
 #################################################################
 #Create hashset that updates peakpos, number of weeks in hot-100
 #################################################################
-path = "/SongPopularityPredictionAlgorithm/output"
+path = "C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/output"
 genius = lyricsgenius.Genius("Xf0XfBJTZon0Sra2rGV56TAXp6jOUaLJVhmHxqbTW5mp-j6S2NVcmHWSLQ29v0dk")
 try:  
     os.mkdir(path)
@@ -39,7 +39,7 @@ def writeSongCharacteristics(i, dataWriter, billboardChart):
 def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
     for year in range(startYear, endYear + 1):
         for month in range (startMonth, endMonth + 1):
-            outputFileName = "\SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv".format(year, month)
+            outputFileName = "C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv".format(year, month)
             day = 1
             while (day <= 31):
                 with open(outputFileName, "a+") as outputFile:
