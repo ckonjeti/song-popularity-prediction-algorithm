@@ -1,0 +1,9 @@
+To-Do:
+
+- Create HashSet for efficiency
+- Add readability metrics
+- If needed optimize for efficiency
+
+Algorithm Ideas:
+
+-
