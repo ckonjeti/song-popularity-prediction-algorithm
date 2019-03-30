@@ -16,9 +16,20 @@ import csv
 #Create hashset that updates peakpos, number of weeks in hot-100
 #################################################################
 
-
 genius = lyricsgenius.Genius("Xf0XfBJTZon0Sra2rGV56TAXp6jOUaLJVhmHxqbTW5mp-j6S2NVcmHWSLQ29v0dk")
 
+def songCharacteristics(i, dataWriter, billboardChart):
+    song = billboardChart[i]
+    title = billboardChart[i].title
+    artist = song.artist
+    peakpos = song.peakPos
+    lastpos = song.lastPos
+    numWeeks = song.weeks
+    rank = song.rank
+    isNew = song.isNew
+    lyrics = genius.search_song(title, artist).lyrics
+    row = [title, artist, lyrics, peakpos, lastpos, numWeeks, rank, isNew]
+    dataWriter.writerow(row)
 
 def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
     for year in range(startYear, endYear + 1):
@@ -33,17 +44,7 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
                             billboardChart = billboard.ChartData('hot-100', date = "{}-{:02d}-{}".format(year, month, day))
                             for i in range(0, numSongs):
                                 try:
-                                    song = billboardChart[i]
-                                    title = billboardChart[i].title
-                                    artist = song.artist
-                                    peakpos = song.peakPos
-                                    lastpos = song.lastPos
-                                    numWeeks = song.weeks
-                                    rank = song.rank
-                                    isNew = song.isNew
-                                    lyrics = genius.search_song(title, artist).lyrics
-                                    row = [title, artist, lyrics, peakpos, lastpos, numWeeks, rank, isNew]
-                                    dataWriter.writerow(row)
+                                    songCharacteristics(i, dataWriter, billboardChart)
                                 except:
                                     pass
                         except:
@@ -53,17 +54,7 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
                             billboardChart = billboard.ChartData('hot-100', date = "{}-{}-01".format(year, month))
                             for i in range(0, numSongs):
                                 try:
-                                    song = billboardChart[i]
-                                    title = billboardChart[i].title
-                                    artist = song.artist
-                                    peakpos = song.peakPos
-                                    lastpos = song.lastPos
-                                    numWeeks = song.weeks
-                                    rank = song.rank
-                                    isNew = song.isNew
-                                    lyrics = genius.search_song(title, artist).lyrics
-                                    row = [title, artist, lyrics, peakpos, lastpos, numWeeks, rank, isNew]
-                                    dataWriter.writerow(row)
+                                    songCharacteristics(i, dataWriter, billboardChart)
                                 except:
                                     pass
                         except:
