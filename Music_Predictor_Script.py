@@ -35,8 +35,8 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
     for year in range(startYear, endYear + 1):
         for month in range (startMonth, endMonth + 1):
             outputFileName = "billboardHot100_Lyrics_{}_{}.csv".format(year, month)
-            day = 0
-            while (day <= 28):            
+            day = 1
+            while (day <= 31):
                 with open(outputFileName, "a+") as outputFile:
                     dataWriter = csv.writer(outputFile)
                     if month in range(1, 10):
@@ -51,7 +51,7 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
                             pass
                     elif month in range(10, 13):
                         try:
-                            billboardChart = billboard.ChartData('hot-100', date = "{}-{}-01".format(year, month))
+                            billboardChart = billboard.ChartData('hot-100', date = "{}-{}-{}".format(year, month, day))
                             for i in range(0, numSongs):
                                 try:
                                     songCharacteristics(i, dataWriter, billboardChart)
@@ -59,7 +59,7 @@ def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
                                     pass
                         except:
                             pass
-                day += 7
+                day += 5
                 
 
-getAllSongData(1, 2009, 3, 2010, 1)
+getAllSongData(1, 2009, 2, 2009, 1)
