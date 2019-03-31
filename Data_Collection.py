@@ -20,6 +20,7 @@ import threading as thread
 #################################################################
 path = "C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output"
 genius = lyricsgenius.Genius("Xf0XfBJTZon0Sra2rGV56TAXp6jOUaLJVhmHxqbTW5mp-j6S2NVcmHWSLQ29v0dk")
+
 try:  
     os.mkdir(path)
 except:  
@@ -50,7 +51,7 @@ def writeSongCharacteristics(i, billboardChart, songs):
             newRow = songs.get(key)
             newRow[5] = billboardChart[i].weeks
             songs[key] = newRow
-            
+    
 
 def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
     for year in range(startYear, endYear + 1):
@@ -100,12 +101,7 @@ def monthlySongData(year, month, numSongs):
 
 
 
-getAllSongData(1, 2017, 6, 2018, 1)
-
-
-
-
-
+getAllSongData(1, 2009, 12, 2019, 100)
 
 
 
