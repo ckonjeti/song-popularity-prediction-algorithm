@@ -3,63 +3,35 @@
 Created on Fri Mar 29 20:15:57 2019
 
 @author: Chaitu Konjeti
-@author: Taylor Smith
 """
-
-#import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+import spotipy
 import billboard
+
 #import applemusicpy
 import lyricsgenius
 #import SpotifyCharts as sCharts
 import csv
 import os
-from text import textstatistics as t
-import lyrics as lyric
+from textstat.textstat import textstat
 import threading as thread
+import re
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 #################################################################
 
-#PATHS:
-
-    #Chaitu: C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/output
-    #        C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv
-    
-    #Taylor: C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output
-    #        C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv
-
 #################################################################
-
-path = "C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output"
+path = "C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/output"
 genius = lyricsgenius.Genius("Xf0XfBJTZon0Sra2rGV56TAXp6jOUaLJVhmHxqbTW5mp-j6S2NVcmHWSLQ29v0dk")
 
-
-sample = lyric.crankDatLyrics()
-text = t()
-
-print((sample))
-
-
-try:  
+try:
     os.mkdir(path)
-except:  
+except:
     pass
 
-
-
-
-"""
-    METHOD:
-        This method gathers data for songs and organizes said data into a HashMap (Dictionary).
-        This method ONLY creates a hash code for each song, then gathers all data into a single list in the HashMap.
-        
-    PARAMATERS:
-        i: The song number in the billboardChart in which we are gathering data
-        billboardChart: The specific chart in which we are collecting data (they will vary only by dates)
-        songs: The HashMap in which all songs and their data are stored
-"""
 def writeSongCharacteristics(i, billboardChart, songs):
     key = str(billboardChart[i].title + billboardChart[i].artist)
-    
+
     if key not in songs:
         song = billboardChart[i]
         title = billboardChart[i].title
@@ -72,7 +44,7 @@ def writeSongCharacteristics(i, billboardChart, songs):
         lyrics = genius.search_song(title, artist).lyrics
         row = [title, artist, lyrics, peakpos, lastpos, numWeeks, currentPos, isNew]
         songs[key] = row
-        
+
     if key in songs:
         if billboardChart[i].peakPos != songs.get(key)[3]:
             newRow = songs.get(key)
@@ -82,69 +54,26 @@ def writeSongCharacteristics(i, billboardChart, songs):
             newRow = songs.get(key)
             newRow[5] = billboardChart[i].weeks
             songs[key] = newRow
-    
-    
-    
 
-"""
-    METHOD:
-        This method creates threads for every year specified.
-        The thread then calls seperate methods to further thread the program.
-        These threads will eventually search for and gather songs and their data.
-        
-    PARAMETERS:
-        startMonth: The month in which data collection will start
-        startYear: The year in which data collection will start
-        endMonth: The month in which data collection will end
-        endYear: The year in which data collection will end
-        numSongs: The number of songs to be collected
-"""
+
 def getAllSongData(startMonth, startYear, endMonth, endYear, numSongs):
     for year in range(startYear, endYear + 1):
         thread.Thread(None, target=yearlySongData, args=(year, startMonth, endMonth, numSongs)).start()
-        
-        
-        
-        
-"""
-    METHOD:
-        This method creates threads for every month specified.
-        The thread then calls seperate methods to further thread the program.
-        These threads will eventually search for and gather songs and their data.
-        This method is used in the getAllSongData thread.
-        
-    PARAMETERS:
-        year: The current year in which the method is taking data (determined in getAllSongData)
-        startMonth: The month in which data collection will start
-        endMonth: The month in which data collection will end
-        numSongs: The number of songs to be collected        
-"""
+
+
 def yearlySongData(year, startMonth, endMonth, numSongs):
     for month in range (startMonth, endMonth + 1):
             thread.Thread(None, target=monthlySongData, args=(year, month, numSongs)).start()
-            
-            
-    
-"""
-    METHOD:
-        This method is called in the yearlySongData method, and collects songs and their data.
-        Every call of this method will create a new CSV file and, using writeSongCharacteristics, will
-        append their data to the created CSV file.
-        CSV files are only written once all data for the month is gathered
-        
-    PARAMETERS:
-        year: The current year in which the method is taking data (determined in getAllSongData)
-        month: The current month in which the method is taking data (determined in yearlySongData)
-        numSongs: The number of songs to be collected
-"""
+
+
 def monthlySongData(year, month, numSongs):
-        outputFileName = "C:/Users/Taylor Smith/Desktop/Code/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv".format(year, month)
-        
+        outputFileName = "C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/output/billboardHot100_Lyrics_{}_{}.csv".format(year, month)
+
         with open(outputFileName, 'a+', newline='', encoding='utf-8') as outputFile:
             songs = {}
             day = 1
             dataWriter = csv.writer(outputFile)
-            
+
             while (day <= 31):
                 if month in range(1, 10):
                     try:
@@ -156,7 +85,7 @@ def monthlySongData(year, month, numSongs):
                                 pass
                     except:
                         pass
-                    
+
                 elif month in range(10, 13):
                     try:
                         billboardChart = billboard.ChartData('hot-100', date = "{}-{}-{}".format(year, month, day))
@@ -168,15 +97,61 @@ def monthlySongData(year, month, numSongs):
                     except:
                         pass
                 day += 5
-                
-            #Accounts for bug where lyrics sometimes include extraneuos information
+
             for key in songs:
                 if (len(songs[key][2]) < 10000):
                     dataWriter.writerow(songs[key])
 
+def lyric_preprocessing(dir):
+    for filename in os.listdir(dir):
+        data = []
+        sid = SentimentIntensityAnalyzer()
+        with open(dir + filename, encoding='utf-8', mode='r+') as csv_file:
+            csv_reader = csv.reader(csv_file, delimiter=',')
+            for row in csv_reader:
+                temp = row
+                num_positive = 0
+                num_negative = 0
+                num_neutral = 0
+                dale_chall_score = 0
+                #print(row[0])
+                lyrics = row[2]
+                lyrics = re.sub(r'[\(\[].*?[\)\]]', '', lyrics)
+                lyrics = os.linesep.join([s for s in lyrics.splitlines() if s])
+                #print(lyrics)
+                #this_sentence = lyrics.decode('utf-8')
+                #numlines = 0
+                for line in lyrics.splitlines():
+                    #print(line)
+                    comp = sid.polarity_scores(line)
+                    #print(comp)
+                    comp = comp['compound']
+                    if comp >= 0.5:
+                        num_positive += 1
+                    elif comp > -0.5 and comp < 0.5:
+                        num_neutral += 1
+                    else:
+                        num_negative += 1
 
+                    #numlines += 1
 
-#getAllSongData(5, 2019, 5, 2019, 5)
+                temp.append(num_positive)
+                temp.append(num_neutral)
+                temp.append(num_negative)
+                temp.append(textstat.dale_chall_readability_score(lyrics))
+                temp.append(textstat.difficult_words(lyrics))
+                data.append(temp)
+                #print(temp)
+            outputFileName = "C:/Users/Chaitu Konjeti/SongPopularityPredictionAlgorithm/processed/" + filename
+
+            with open(outputFileName, 'a+', newline='', encoding='utf-8') as outputFile:
+                dataWriter = csv.writer(outputFile)
+                for items in data:
+                    #print(items)
+                    dataWriter.writerow(items)
+
+#getAllSongData(1, 2000, 12, 2019, 100)
+lyric_preprocessing("output/")
 
 
 
